@@ -1,9 +1,10 @@
 import numpy as np
 
 from foundations import Tokenize
-import time
+import unittest
 
 
+## Start creating class as tests
 tokenizer = Tokenize(
     root_dir='../data',
     file_name='hamlet.txt',
