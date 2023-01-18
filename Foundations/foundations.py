@@ -2,7 +2,7 @@
 import os
 import re
 import nltk
-from typing import List
+import pandas as pd
 
 class Tokenize():
     """
@@ -22,10 +22,15 @@ class Tokenize():
     normalized: bool,
     Apply normalization on the tokens -> Lemmatization
     """
+
+    CURRENT_PATH = './'
+    EMPTY_FILE = 'file.txt'
+
     def __init__(
         self,
-        root_dir:str,
-        file_name:str,
+        root_dir:str=CURRENT_PATH,
+        file_name:str=EMPTY_FILE,
+        series:pd.Series=None,
         stopwords:bool=False,
         normalized:bool=False
     ):
@@ -35,8 +40,13 @@ class Tokenize():
         self.normalized = normalized
         self.tokens_filled = False
         self._tokens = []
+        self._df = series
 
-        if not os.path.exists(os.path.join(root_dir, file_name)):
+        if self._df is not None:
+            self.list_docs = self._df.tolist()
+            self.full_text = ''.join(self.list_docs)
+
+        elif not os.path.exists(os.path.join(root_dir, file_name)):
             raise ValueError(
                 'The given path: {} does not exist'.format(os.path.join(root_dir, file_name))
             )
@@ -64,7 +74,7 @@ class Tokenize():
         return parsed_text
 
 
-    def _split_into_tokens(self, text:str):
+    def _split_into_tokens(self, text:str, flatten:bool):
         """
         Initiate the splitting process and updates the tokens list
         """
@@ -78,25 +88,24 @@ class Tokenize():
                 self._tokens.append(line.split())
 
         # Flatten the tokens
-        self._tokens = [token for item in self._tokens for token in item]
+        if flatten:
+            self._tokens = [token for item in self._tokens for token in item]
 
-    def get_tokens(self):
-        """
-        Returns the list of all tokens after applying stopword removal and normalization
-        """
-        self._split_into_tokens(self.full_text)
+        return self._tokens
 
-        if self.stopwords:
-            from nltk.corpus import stopwords
-            try:
-                nltk.data.find('corpora/stopwords')
-            except LookupError:
-                nltk.download('stopwords')
+    def _stopwords(self, doc:list):
+        from nltk.corpus import stopwords
+        try:
+            nltk.data.find('corpora/stopwords')
+        except LookupError:
+            nltk.download('stopwords')
 
-            _stop_words = set(stopwords.words('english'))
+        _stop_words = set(stopwords.words('english'))
 
-            # Remove stopwords:
-            self._tokens = list(filter(lambda x: not x in _stop_words, self._tokens))
+        # Remove stopwords:
+        return list(filter(lambda x: not x in _stop_words, doc))
+
+    def _normalize(self, doc:list):
 
         if self.normalized:
             from nltk.stem import WordNetLemmatizer
@@ -108,16 +117,53 @@ class Tokenize():
             lematizer = WordNetLemmatizer()
 
             # Lemmatize all the tokens:
-            normalized_tokens = list(map(lambda x: lematizer.lemmatize(x, pos='v'), self._tokens))
+            normalized_tokens = list(map(lambda x: lematizer.lemmatize(x, pos='v'), doc))
             normalized_tokens = list(map(lambda x: lematizer.lemmatize(x, pos='n'), normalized_tokens))
             normalized_tokens = list(map(lambda x: lematizer.lemmatize(x, pos='a'), normalized_tokens))
-            self._tokens = normalized_tokens
 
-            # Remove all unitary tokens
-            self._tokens = list(filter(lambda x: len(x) > 1, self._tokens))
-            self.tokens_filled = True
+            # self._tokens = normalized_tokens
+            return normalized_tokens
 
-        return self._tokens
+    def get_tokens(self):
+        """
+        Returns the list of all tokens after applying stopword removal and normalization
+        """
+        if self._df is not None:
+            for doc in self.list_docs:
+                self._split_into_tokens(text=doc, flatten=False)
+
+            doc_stopwords = [self._stopwords(doc) for doc in self._tokens]
+            doc_normalized = [self._normalize(doc) for doc in doc_stopwords]
+            doc_normalized = [list(filter(lambda x: len(x) > 1, doc)) for doc in doc_normalized]
+
+            return doc_normalized
+
+        # else:
+        #     self._split_into_tokens(self.full_text)
+        #
+        # if self.stopwords:
+        #
+        #
+        # if self.normalized:
+        #     from nltk.stem import WordNetLemmatizer
+        #     try:
+        #         nltk.data.find('corpora/wordnet.zip')
+        #     except LookupError:
+        #         nltk.download('wordnet')
+        #
+        #     lematizer = WordNetLemmatizer()
+        #
+        #     # Lemmatize all the tokens:
+        #     normalized_tokens = list(map(lambda x: lematizer.lemmatize(x, pos='v'), self._tokens))
+        #     normalized_tokens = list(map(lambda x: lematizer.lemmatize(x, pos='n'), normalized_tokens))
+        #     normalized_tokens = list(map(lambda x: lematizer.lemmatize(x, pos='a'), normalized_tokens))
+        #     self._tokens = normalized_tokens
+        #
+        #     # Remove all unitary tokens
+        #     self._tokens = list(filter(lambda x: len(x) > 1, self._tokens))
+        #     self.tokens_filled = True
+        #
+        # return self._tokens
 
     def _check_tokens(self):
         if not self.tokens_filled:
