@@ -121,7 +121,7 @@ class VectorEmbeddings():
                 return torch.mean(self.hidden_states[-2][0], dim=0)
         else:
             raise ValueError(
-                'The Embedding model has not been initialized'
+                'The Embedding model has not been loaded'
             )
 
 
