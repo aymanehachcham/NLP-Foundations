@@ -86,6 +86,13 @@ class Tokenizer():
             file = os.path.join(root_dir, file_name)
             with open(file) as f: self.full_text = f.read()
 
+    # def trackcalls(self, func):
+    #     def wrapper(*args, **kwargs):
+    #         wrapper.has_been_called = True
+    #         return func(*args, **kwargs)
+    #
+    #     wrapper.has_been_called = False
+    #     return wrapper
 
     @staticmethod
     def _preprocess_text(text:str) -> str:

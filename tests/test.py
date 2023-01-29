@@ -6,6 +6,7 @@ import string
 from Foundations.foundations import Tokenizer
 import unittest
 from unittest import TestCase
+import functools
 
 
 DATA_ROOT_DIR = '../data'
@@ -36,6 +37,16 @@ class TestTokenizer(TestCase):
         self.assertIsInstance(tokenizer.list_docs, list)
         self.assertEqual(tokenizer.root_dir, './')
         self.assertEqual(tokenizer.filename, 'file.txt')
+
+    def test_init_with_stopwords_normalization(self):
+        tokenizer = Tokenizer(
+            series=pd.read_csv(os.path.join(DATA_ROOT_DIR, SERIES))['review'],
+            stopwords=True,
+            normalized=True
+        )
+
+        self.assertIsNotNone(tokenizer.stopwords)
+        self.assertIsNotNone(tokenizer.normalized)
 
     def test_split_into_tokens_flatten(self):
         tokenizer = Tokenizer(
@@ -68,6 +79,15 @@ class TestTokenizer(TestCase):
         self.assertIsInstance(tokens, list)
         self.assertIsInstance(tokens[0], list)
         self.assertIsNotNone(tokenizer._tokens)
+
+    def test_get_tokens(self):
+        tokenizer = Tokenizer(
+            series=pd.read_csv(os.path.join(DATA_ROOT_DIR, SERIES))['review'],
+            stopwords=True,
+            normalized=True
+        )
+        tokens = tokenizer.get_tokens()
+        self.assertIsNotNone(tokens)
 
 
 if __name__ == '__main__':

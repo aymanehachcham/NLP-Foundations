@@ -1,7 +1,7 @@
 import pandas as pd
 import torch
 
-from foundations import Tokenize
+from foundations import Tokenizer
 import gensim
 from gensim.models.doc2vec import TaggedDocument
 from typing import Literal
@@ -41,7 +41,7 @@ class VectorEmbeddings():
 
     @tokens.setter
     def tokens(self, docs:int):
-        self._tokens = Tokenize(
+        self._tokens = Tokenizer(
             series=self.df[:docs],
             stopwords=True,
             normalized=True
@@ -92,7 +92,7 @@ class VectorEmbeddings():
     def infer_vector(self, doc:pd.Series, index:int):
         if self.vocab:
             if self.embedding == 'doc2vec':
-                doc_tokenized = Tokenize(
+                doc_tokenized = Tokenizer(
                     series=doc[index - 1:index],
                     stopwords=True,
                     normalized=True
