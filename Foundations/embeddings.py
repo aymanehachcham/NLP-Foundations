@@ -1,7 +1,7 @@
 import pandas as pd
 import torch
 
-from foundations import Tokenizer
+from Foundations.foundations import Tokenizer
 import gensim
 from gensim.models.doc2vec import TaggedDocument
 from typing import Literal
@@ -89,11 +89,11 @@ class VectorEmbeddings():
         if self.embedding == 'doc2vec':
             self._fit_doc2vec_model()
 
-    def infer_vector(self, doc:pd.Series, index:int):
+    def infer_vector(self, doc:pd.Series):
         if self.vocab:
             if self.embedding == 'doc2vec':
                 doc_tokenized = Tokenizer(
-                    series=doc[index - 1:index],
+                    series=doc,
                     stopwords=True,
                     normalized=True
                 ).get_tokens()[0]
@@ -101,7 +101,7 @@ class VectorEmbeddings():
                 return self.model.infer_vector(doc_tokenized)
 
             if self.embedding == 'bert':
-                sentence_inputs = list(filter(lambda x:x!='', doc[index - 1:index].tolist()[0].split('.')))
+                sentence_inputs = list(filter(lambda x:x!='', doc.tolist()[0].split('.')))
                 doc_input = ''.join(sentence_inputs[:10])
 
                 marked_text = "[CLS] " + doc_input + " [SEP]"

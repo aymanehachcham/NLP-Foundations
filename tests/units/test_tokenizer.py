@@ -9,7 +9,7 @@ from unittest import TestCase
 import functools
 
 
-DATA_ROOT_DIR = '../data'
+DATA_ROOT_DIR = '../../data'
 FILE_NAME = 'hamlet.txt'
 SERIES = 'data.csv'
 
@@ -82,12 +82,20 @@ class TestTokenizer(TestCase):
 
     def test_get_tokens(self):
         tokenizer = Tokenizer(
-            series=pd.read_csv(os.path.join(DATA_ROOT_DIR, SERIES))['review'],
+            series=pd.read_csv(os.path.join(DATA_ROOT_DIR, SERIES))['review'][:10],
             stopwords=True,
             normalized=True
         )
         tokens = tokenizer.get_tokens()
-        self.assertIsNotNone(tokens)
+        self.assertIsNotNone(tokenizer._tokens)
+        self.assertTrue(tokenizer.tokens_filled)
+        self.assertIsInstance(tokens, list)
+        self.assertIsInstance(tokens[0], list)
+        self.assertTrue([token != '' for doc_token in tokens for token in doc_token])
+        self.assertTrue([token.islower() != '' for doc_token in tokens for token in doc_token])
+        self.assertTrue([len(item) > 1 for doc_token in tokens for item in doc_token])
+        self.assertTrue(len(list(filter(lambda x: x in string.punctuation,
+                                        tokens[random.randint(0, 10)]))) == 0)
 
 
 if __name__ == '__main__':

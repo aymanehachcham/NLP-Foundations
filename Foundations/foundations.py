@@ -54,7 +54,7 @@ class Tokenizer():
 
             self.stop_words = set(stopwords.words('english'))
 
-        elif self.normalized:
+        if self.normalized:
             ## Lemmatizer loading
             from nltk.stem import WordNetLemmatizer
             try:
@@ -65,7 +65,7 @@ class Tokenizer():
             self.lematizer = WordNetLemmatizer()
 
 
-        elif not os.path.exists(os.path.join(root_dir, file_name)) and self._df is None:
+        if not os.path.exists(os.path.join(root_dir, file_name)) and self._df is None:
             raise ValueError(
                 'Tokenizer must be initialized with either a pandas Series or a text file'
             )
@@ -136,7 +136,7 @@ class Tokenizer():
 
     def _stopwords(self, doc:list):
         # Remove stopwords:
-        return list(filter(lambda x: not x in self.stopwords, doc))
+        return list(filter(lambda x: not x in self.stop_words, doc))
 
     def _normalize(self, doc:list):
         # Normalize the tokens with lemmatization
