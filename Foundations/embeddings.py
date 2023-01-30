@@ -10,7 +10,7 @@ from typing import Literal
 class VectorEmbeddings():
     def __init__(
         self,
-        df:pd.Series,
+        series:pd.Series,
         doc_vect_size:int=100,
         min_freq_word_count:int=2,
         num_docs:int=100,
@@ -18,7 +18,7 @@ class VectorEmbeddings():
     ):
         self._tokens = []
         self.model = None
-        self.df = df
+        self.df = series
         self.min_freq_word_count = min_freq_word_count
         self.vocab:bool=False
         self.num_docs = num_docs
@@ -101,11 +101,10 @@ class VectorEmbeddings():
                 return self.model.infer_vector(doc_tokenized)
 
             if self.embedding == 'bert':
-                sentence_inputs = list(filter(lambda x:x!='', doc.tolist()[0].split('.')))
-                doc_input = ''.join(sentence_inputs[:10])
 
-                marked_text = "[CLS] " + doc_input + " [SEP]"
-                tokens = self.bert_tokenizer.tokenize(marked_text)
+                marked_text = "[CLS] " + doc + " [SEP]"
+                tokens = self.bert_tokenizer.tokenize(marked_text)[:512]
+                print(len(tokens))
                 idx = self.bert_tokenizer.convert_tokens_to_ids(tokens)
                 segment_id = [1] * len(tokens)
 
@@ -124,15 +123,6 @@ class VectorEmbeddings():
                 'The Embedding model has not been loaded'
             )
 
-
-
-
-df = pd.read_csv('data.csv')['review']
-doc = df[10:11]
-
-token_model = VectorEmbeddings(df, embedding='bert')
-token_model.load_model()
-print(token_model.infer_vector(df, 100))
 
 
 
