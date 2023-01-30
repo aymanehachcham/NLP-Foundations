@@ -104,7 +104,6 @@ class VectorEmbeddings():
 
                 marked_text = "[CLS] " + doc + " [SEP]"
                 tokens = self.bert_tokenizer.tokenize(marked_text)[:512]
-                print(len(tokens))
                 idx = self.bert_tokenizer.convert_tokens_to_ids(tokens)
                 segment_id = [1] * len(tokens)
 

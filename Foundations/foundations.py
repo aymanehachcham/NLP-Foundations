@@ -31,6 +31,7 @@ class Tokenizer():
         root_dir:str=CURRENT_PATH,
         file_name:str=EMPTY_FILE,
         series:pd.Series=None,
+        index:int=None,
         stopwords:bool=False,
         normalized:bool=False
     ):
@@ -43,6 +44,7 @@ class Tokenizer():
         self.tokens_filled = False
         self._tokens = []
         self._df = series
+        self.doc_index = index
 
         if self.stopwords:
             ## Stop words loading
@@ -71,12 +73,17 @@ class Tokenizer():
             )
 
         elif self._df is not None:
+            self.list_docs = []
             try:
-                self.list_docs = self._df.tolist()
+                if isinstance(self._df, str):
+                    self.list_docs.append(self._df)
+                else:
+                    self.list_docs = self._df.tolist()
             except Exception:
                 raise ValueError(
                     'The given Series is not valid'
                 )
+
 
         elif not os.path.exists(os.path.join(root_dir, file_name)):
             raise ValueError(
@@ -85,14 +92,6 @@ class Tokenizer():
         else:
             file = os.path.join(root_dir, file_name)
             with open(file) as f: self.full_text = f.read()
-
-    # def trackcalls(self, func):
-    #     def wrapper(*args, **kwargs):
-    #         wrapper.has_been_called = True
-    #         return func(*args, **kwargs)
-    #
-    #     wrapper.has_been_called = False
-    #     return wrapper
 
     @staticmethod
     def _preprocess_text(text:str) -> str:
